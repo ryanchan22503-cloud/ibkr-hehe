@@ -1,4 +1,5 @@
 # Local IBKR Options Advisor
+committing changes
 
 A local, read-only options position reviewer using Node.js, the official IBKR
 Python API and optional OpenAI analysis. It supports covered-call and conditional

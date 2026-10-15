@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IBKR Options Advisor</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">LOCAL • READ ONLY</p>
+      <h1>IBKR Options Advisor</h1>
+      <p>Short-put and covered-call risk review</p>
+    </header>
+
+    <section class="card">
+      <h2>Connections</h2>
+      <div class="grid">
+        <label>IBKR connection<select id="brokerMode"><option value="tws">Trader Workstation (read-only)</option><option value="gateway">Client Portal Gateway / OAuth</option></select></label>
+        <label id="twsSettings" hidden>TWS socket port<select id="twsPort"><option value="7496">7496 - Live</option><option value="7497">7497 - Paper</option></select></label>
+        <label>OpenAI API key <span id="keyState">Not saved</span><input id="openaiKey" type="password" autocomplete="off" placeholder="sk-…" maxlength="512"></label>
+        <label>OpenAI model<input id="model" autocomplete="off" placeholder="Enter a model available to your API project"></label>
+        <label id="gatewayBaseSettings">IBKR API base URL<input id="ibkrBase" autocomplete="off"></label>
+        <label id="gatewayTokenSettings">IBKR OAuth bearer token <span>(leave blank for local Gateway)</span><input id="ibkrToken" type="password" autocomplete="off"></label>
+        <label>IBKR account ID <span>(optional when exactly one account)</span><input id="accountId" autocomplete="off"></label>
+      </div>
+      <div class="settingsActions">
+        <button id="saveAi" class="secondary" disabled>Save AI settings</button>
+        <button id="forgetAi" class="secondary" disabled>Forget saved settings</button>
+      </div>
+      <output id="aiSettingsOutput" aria-live="polite"></output>
+      <p class="note">Saved OpenAI settings are encrypted for your Windows account. IBKR passwords and tokens are not saved.</p>
+      <button id="status" class="secondary">Test IBKR connection</button>
+      <label id="gatewayKeepAlive" class="check"><input id="keepAlive" type="checkbox" checked>Keep the local Gateway session active</label>
+      <output id="statusOutput" aria-live="polite"></output>
+      <a id="gatewayLogin" hidden target="_blank" rel="noopener noreferrer">Open Gateway login</a>
+    </section>
+
+    <section class="card">
+      <h2>Data sources</h2>
+      <fieldset class="provider" id="data-tradier">
+        <legend>Tradier: stock and option prices</legend>
+        <div class="grid">
+          <label>API token <span id="tradierKeyState">Not configured</span><input id="tradierKey" type="password" autocomplete="off" maxlength="512" disabled></label>
+          <label>Token environment<select id="tradierMode" disabled><option value="sandbox">Sandbox: 15-minute delayed</option><option value="live">Brokerage: live data entitlement required</option></select></label>
+        </div>
+        <label class="check"><input id="tradierEnabled" type="checkbox" checked disabled>Use Tradier</label>
+        <div class="settingsActions"><button class="secondary" id="tradierSave" disabled>Save token</button><button class="secondary" id="tradierTest" disabled>Test connection</button><button class="secondary" id="tradierForget" disabled>Forget token</button></div>
+        <output id="tradierOutput" aria-live="polite"></output>
+        <p class="note"><a href="https://web.tradier.com/user/api" target="_blank" rel="noopener noreferrer">Tradier API token</a> | <a href="https://tradier.com/pricing" target="_blank" rel="noopener noreferrer">Account fees and eligibility</a>. API access is included; brokerage inactivity and other fees can apply.</p>
+      </fieldset>
+      <fieldset class="provider" id="data-alpha_vantage">
+        <legend>Alpha Vantage: events and research</legend>
+        <label>API key <span id="alpha_vantageKeyState">Not configured</span><input id="alpha_vantageKey" type="password" autocomplete="off" maxlength="512" disabled></label>
+        <label class="check"><input id="alpha_vantageEnabled" type="checkbox" checked disabled>Use Alpha Vantage</label>
+        <div class="settingsActions"><button class="secondary" id="alpha_vantageSave" disabled>Save key</button><button class="secondary" id="alpha_vantageTest" disabled>Test connection</button><button class="secondary" id="alpha_vantageForget" disabled>Forget key</button></div>
+        <output id="alpha_vantageOutput" aria-live="polite"></output>
+        <p class="note"><a href="https://www.alphavantage.co/support/#api-key" target="_blank" rel="noopener noreferrer">Get a free Alpha Vantage key</a>. Local limits: three new requests per review, 25 per UTC day. Provider limits and plan restrictions also apply.</p>
+      </fieldset>
+      <p class="note">Keys are encrypted for your Windows account. These providers receive requested public symbols, not your account ID, cash balances or trade history.</p>
+      <button class="secondary" id="resetData" disabled>Forget all data-source keys</button>
+    </section>
+
+    <section class="card">
+      <h2>Analysis request</h2>
+      <label class="check"><input id="useAi" type="checkbox" disabled>Include AI review</label>
+      <label class="check"><input id="scanIdeas" type="checkbox" checked>Screen new CSP ideas</label>
+      <p class="note">AI review sends your question and sanitized portfolio snapshot to OpenAI. API charges may apply.</p>
+      <label>Your question <span id="questionState">Not saved</span><textarea id="question" rows="6" maxlength="64000" disabled>Review my actual IBKR option positions and give me a decision-first management plan.</textarea></label>
+      <div class="settingsActions">
+        <button id="saveQuestion" class="secondary" disabled>Save question</button>
+        <button id="forgetQuestion" class="secondary" disabled>Forget saved question</button>
+      </div>
+      <output id="questionSettingsOutput" aria-live="polite"></output>
+      <button id="analyze" disabled>Fetch positions and analyze</button>
+      <button id="cancel" class="secondary" hidden>Cancel analysis</button>
+      <p id="working" hidden>Reading IBKR and requesting analysis…</p>
+    </section>
+
+    <section class="card result" id="resultCard" hidden>
+      <div class="resultHeader"><h2>Position review</h2><span id="meta"></span></div>
+      <pre id="validation" role="status"></pre>
+      <pre id="advice" aria-live="polite"></pre>
+      <details><summary>Verified local figures</summary><pre id="verified"></pre></details>
+      <details><summary>Exact OpenAI request, excluding API key</summary><pre id="payload"></pre></details>
+    </section>
+
+    <section class="warning">
+      <strong>Safety boundary:</strong> this app has no trade-placement or order-change function. Educational analysis only; verify every figure and decision in IBKR.
+    </section>
+  </main>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

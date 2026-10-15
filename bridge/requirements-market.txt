@@ -1,0 +1,7 @@
+QuantLib==1.43
+ta==0.11.0
+pandas==3.0.6
+numpy==2.5.3
+python-dateutil==2.9.0.post0
+six==1.17.0
+tzdata==2026.5

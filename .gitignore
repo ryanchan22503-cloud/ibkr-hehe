@@ -1,0 +1,42 @@
+# Credentials, broker sessions and local configuration
+.env
+.env.*
+!.env.example
+*.dpapi
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+certs/
+credentials/
+secrets/
+config.local.*
+
+# Portfolio reports, saved questions, request dumps and logs
+outputs/
+reports/
+logs/
+data/
+*.log
+*.csv
+*.xlsx
+*.pdf
+*.png
+*.jpg
+*.zip
+*-settings*.json
+*saved-question*.json
+*live-test*.json
+research-budget*.json
+
+# Local environments and generated files
+.tws-venv/
+.venv/
+venv/
+node_modules/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.DS_Store
+Thumbs.db
